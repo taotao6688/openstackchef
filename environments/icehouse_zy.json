@@ -1,0 +1,251 @@
+{
+  "name": "icehouse_zy",
+  "description": "",
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "override_attributes": {
+    "pacemaker": {
+      "cluster": {
+        "endpoints": ["zy0", "zy1", "zy2"],
+        "haproxy": ["zy4", "zy5", "zy6"]
+      }
+    },
+    "openstack": {
+      "ha": {
+        "enabled": true,
+        "resource_manager": "pacemaker",
+        "nodes": ["10.0.1.154", "10.0.1.155", "10.0.1.156"],
+        "endpoints": {
+          "vip": "10.0.1.120"  
+        }
+      },
+      "developer_mode": true,
+      "yum": {
+        "rdo_enabled": false
+      },
+      "mq": {
+        "service_type": "qpid",
+        "image": {
+          "notifier_strategy": "qpid"
+        },
+        "qpid": {
+          "vip": "10.0.1.121",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        }
+      },
+      "db": {
+        "service_type": "mysql",
+        "compute": {
+          "db_name": "nova",
+          "username": "nova1"
+        },
+        "identity": {
+          "db_name": "keyston",
+          "username": "keyston1"
+        },
+        "image": {
+          "db_name": "glance",
+          "username": "glance1"
+        },
+        "network": {
+          "db_name": "neutron",
+          "username": "neutron1"
+        },
+        "block-storage": {
+          "db_name": "cinder",
+          "username": "cinder1"
+        },
+        "dashboard": {
+          "db_name": "horizon",
+          "username": "horizon1"
+        },
+        "telemetry": {
+          "nosql": {
+            "used": true
+          },
+          "db_name": "ceilome",
+          "username": "ceilome1"
+        },
+        "orchestration": {
+          "db_name": "heat",
+          "username": "heat1"
+        },
+        "db2": {
+          "version": "10.5",
+          "vip": "openstack.db.db2.vip",
+          "db_name": "openstack.db.db2.db_name",
+          "primary_host": "openstack.db.db2.primary_host",
+          "standby_host": "openstack.db.db2.standby_host",
+          "url": "openstack.db.db2.url",
+          "odbc_url": "openstack.db.db2.odbc_url"
+        }
+      },
+      "compute": {
+        "enabled_apis": "osapi_compute,metadata",
+        "driver": "nova.virt.libvirt.LibvirtDriver",
+        "network": {
+          "service_type": "neutron",
+          "plugins": ["openvswitch"]
+        }
+      },
+      "block-storage": {
+        "volume": {
+          "create_volume_group": false
+        }
+      },
+      "image": {
+        "upload_images": ["cirros", "precise"],
+        "upload_image": {
+          "precise": "http://10.0.1.39:8081/static/images/precise-server-cloudimg-amd64-disk1.img",
+          "cirros": "http://10.0.1.39:8081/static/images/cirros-0.3.0-x86_64-uec.tar.gz"
+        }
+      },
+      "network": {
+        "db_stamp": "havana",
+        "platform": {
+          "neutron_openvswitch_packages": ["kmod-openvswitch", "openvswitch"]
+        },
+        "use_namespaces": "False",
+        "service_plugins": ["router"],
+        "ml2": {
+          "type_drivers": "gre",
+          "tunnel_id_ranges": "1:1000",
+          "tenant_network_types": "gre",
+          "mechanism_drivers": "openvswitch",
+          "enable_security_group": "True"
+        },
+        "metadata": {
+          "nova_metadata_ip": "openstack.endpoints.compute-api.host"
+        },
+        "l3": {
+          "external_network_bridge_interface": "eth9"
+        },
+        "openvswitch": {
+          "tunnel_type": "gre",
+          "enable_tunneling": "True",
+          "tenant_network_type": "gre",
+          "tunnel_id_ranges": "1:1000",
+          "enable_security_group": "True",
+          "local_ip_interface": "eth1"
+        }
+      },
+      "dashboard": {
+        "platform": {
+          "horizon_packages": ["openstack-dashboard", "python-mox"]
+        }
+      },
+      "endpoints": {
+        "bind-host": "0.0.0.0",
+        "db": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"],
+          "port": "3306",
+          "ha_enabled": true
+        },
+        "mq": {
+          "host": "10.0.1.121",
+          "port": "5672"
+        },
+        "identity-api": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "identity-admin": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "compute-api": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "compute-ec2-api": {
+          "ha_enabled": false,
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "compute-ec2-admin": {
+          "ha_enabled": false,
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "compute-xvpvnc": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "compute-novnc": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "network-api": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "image-api": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "image-registry": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "block-storage-api": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "object-storage-api": {
+          "ha_enabled": false,
+          "host": "127.0.0.1"
+        },
+        "orchestration-api": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "orchestration-api-cfn": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "orchestration-api-cloudwatch": {
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        },
+        "telemetry-api": {
+          "ha_enabled": false,
+          "host": "10.0.1.120",
+          "nodes": ["10.0.1.151", "10.0.1.152", "10.0.1.150"]
+        }
+      },
+      "secret": {
+        "key_path": "/etc/chef/encrypted_data_bag_secret"
+      }
+    },
+    "mysql": {
+      "bind_address": "0.0.0.0",
+      "tunable": {
+        "skip-name-resolve": true
+      },
+      "allow_remote_root": false,
+      "remove_anonymous_users": true,
+      "server_root_password": "password"
+    },
+    "yum": {
+      "repo": [
+        {
+          "name": "rhel",
+          "url": "ftp://yuezhy%40cn.ibm.com:zhangyue123@ftp3.linux.ibm.com/redhat/abat_yum/rhel-6-u5/"
+        },
+        {
+          "name": "epel",
+          "url": "http://dl.fedoraproject.org/pub/epel/6Server/x86_64"
+        },
+        {
+          "name": "openstack-noarch",
+          "url": "http://rchgsa.ibm.com/projects/e/emsol/ccs/build/driver/osee-icehouse/openstack/D20140708-0048/noarch/"
+        },
+        {
+          "name": "openstack-x86_64",
+          "url": "http://rchgsa.ibm.com/projects/e/emsol/ccs/build/driver/osee-icehouse/openstack/D20140708-0048/x86_64"
+        }
+      ]
+    }
+  }
+}

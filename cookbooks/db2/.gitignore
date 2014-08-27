@@ -1,0 +1,5 @@
+.bundle/
+.cookbooks/
+.coverage/
+*.swp
+Berksfile.lock

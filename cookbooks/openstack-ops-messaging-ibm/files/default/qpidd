@@ -1,0 +1,386 @@
+#!/bin/sh
+#
+#
+# OpenStack NovaAPI (qpid)
+#
+# Description:  Manages an OpenStack Nova API (qpid) process as an HA resource
+#
+# Authors:      Sébastien Han
+# Mainly inspired by the Glance API resource agent written by Martin Gerhard Loschwitz from Hastexo: http://goo.gl/whLpr
+#
+# Support:      openstack@lists.launchpad.net
+# License:      Apache Software License (ASL) 2.0
+#
+#
+# See usage() function below for more details ...
+#
+# OCF instance parameters:
+#   OCF_RESKEY_binary
+#   OCF_RESKEY_config
+#   OCF_RESKEY_user
+#   OCF_RESKEY_pid
+#   OCF_RESKEY_os_username
+#   OCF_RESKEY_os_password
+#   OCF_RESKEY_os_tenant_name
+#   OCF_RESKEY_keystone_get_token_url
+#   OCF_RESKEY_additional_parameters
+#######################################################################
+# Initialization:
+
+: ${OCF_FUNCTIONS_DIR=${OCF_ROOT}/lib/heartbeat}
+. ${OCF_FUNCTIONS_DIR}/ocf-shellfuncs
+
+#######################################################################
+
+# Fill in some defaults if no values are specified
+
+OCF_RESKEY_binary_default="qpidd"
+OCF_RESKEY_config_default="/etc/qpid/qpidd.conf"
+OCF_RESKEY_pid_default="/var/run/qpidd.pid"
+
+: ${OCF_RESKEY_binary=${OCF_RESKEY_binary_default}}
+: ${OCF_RESKEY_config=${OCF_RESKEY_config_default}}
+: ${OCF_RESKEY_pid=${OCF_RESKEY_pid_default}}
+
+#######################################################################
+
+usage() {
+    cat <<UEND
+        usage: $0 (start|stop|validate-all|meta-data|status|monitor)
+
+        $0 manages an OpenStack NovaAPI (qpid) process as an HA resource 
+
+        The 'start' operation starts the qpid service.
+        The 'stop' operation stops the qpid service.
+        The 'validate-all' operation reports whether the parameters are valid
+        The 'meta-data' operation reports this RA's meta-data information
+        The 'status' operation reports whether the qpid service is running
+        The 'monitor' operation reports whether the qpid service seems to be working
+
+UEND
+}
+
+meta_data() {
+    cat <<END
+<?xml version="1.0"?>
+<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+<resource-agent name="qpid">
+<version>1.0</version>
+
+<longdesc lang="en">
+Resource agent for the QPID
+</longdesc>
+<shortdesc lang="en">Manages the QPID</shortdesc>
+<parameters>
+
+<parameter name="binary" unique="0" required="0">
+<longdesc lang="en">
+Location of the OpenStack Nova API server binary (qpid)
+</longdesc>
+<shortdesc lang="en">OpenStack Nova API server binary (qpid)</shortdesc>
+<content type="string" default="${OCF_RESKEY_binary_default}" />
+</parameter>
+
+<parameter name="config" unique="0" required="0">
+<longdesc lang="en">
+Location of the OpenStack Nova API (qpid) configuration file
+</longdesc>
+<shortdesc lang="en">OpenStack Nova API (qpid registry) config file</shortdesc>
+<content type="string" default="${OCF_RESKEY_config_default}" />
+</parameter>
+
+<parameter name="pid" unique="0" required="0">
+<longdesc lang="en">
+The pid file to use for this OpenStack Nova API (qpid) instance
+</longdesc>
+<shortdesc lang="en">OpenStack Nova API (qpid) pid file</shortdesc>
+<content type="string" default="${OCF_RESKEY_pid_default}" />
+</parameter>
+
+<parameter name="os_username" unique="0" required="0">
+<longdesc lang="en">
+The username to use when connecting with Nova API (qpid) for monitoring purposes
+</longdesc>
+<shortdesc lang="en">Nova API (qpid) monitoring login</shortdesc>
+<content type="string" />
+</parameter>
+
+<parameter name="os_password" unique="0" required="0">
+<longdesc lang="en">
+The password to use when connecting Nova API (qpid) for monitoring purposes
+</longdesc>
+<shortdesc lang="en">Nova API (qpid) monitoring password</shortdesc>
+<content type="string" />
+</parameter>
+
+<parameter name="os_tenant_name" unique="0" required="0">
+<longdesc lang="en">
+The tenant to use when connecting Nova API (qpid) for monitoring purposes
+</longdesc>
+<shortdesc lang="en">Nova API (qpid) monitoring tenant</shortdesc>
+<content type="string" />
+</parameter>
+
+<parameter name="additional_parameters" unique="0" required="0">
+<longdesc lang="en">
+Additional parameters to pass on to the OpenStack NovaAPI (qpid)
+</longdesc>
+<shortdesc lang="en">Additional parameters for qpid</shortdesc>
+<content type="string" />
+</parameter>
+
+</parameters>
+
+<actions>
+<action name="start" timeout="20" />
+<action name="stop" timeout="20" />
+<action name="status" timeout="20" />
+<action name="monitor" timeout="10" interval="5" />
+<action name="validate-all" timeout="5" />
+<action name="meta-data" timeout="5" />
+</actions>
+</resource-agent>
+END
+}
+
+#######################################################################
+# Functions invoked by resource manager actions
+
+qpid_validate() {
+    local rc
+
+    check_binary $OCF_RESKEY_binary
+    
+    # A config file on shared storage that is not available
+    # during probes is OK.
+    if [ ! -f $OCF_RESKEY_config ]; then
+        if ! ocf_is_probe; then
+            ocf_log err "Config $OCF_RESKEY_config doesn't exist"
+            return $OCF_ERR_INSTALLED
+        fi
+        ocf_log_warn "Config $OCF_RESKEY_config not available during a probe"
+    fi
+
+    getent passwd $OCF_RESKEY_user >/dev/null 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+        ocf_log err "User $OCF_RESKEY_user doesn't exist"
+        return $OCF_ERR_INSTALLED
+    fi
+
+    true
+}
+
+qpid_status() {
+    local pid
+    local rc
+
+    if [ ! -f $OCF_RESKEY_pid ]; then
+        ocf_log info "qpid is not running"
+        return $OCF_NOT_RUNNING
+    else
+        pid=`cat $OCF_RESKEY_pid`
+    fi
+
+    ocf_run -warn kill -s 0 $pid
+    rc=$?
+    if [ $rc -eq 0 ]; then
+        return $OCF_SUCCESS
+    else
+        ocf_log info "Old PID file found, but qpid is not running"
+        return $OCF_NOT_RUNNING
+    fi
+}
+
+qpid_monitor() {
+    local rc
+
+    qpid_status
+    rc=$?
+
+    # If status returned anything but success, return that immediately
+    if [ $rc -ne $OCF_SUCCESS ]; then
+        return $rc
+    fi
+    ocf_log info "qpid  monitor succeeded"
+    hadr=$(qpid_ha_status)
+    case "$hadr" in
+       joining)
+       crm_master -l reboot -v 1
+       ;;
+
+       active)
+            # nothing to do, only update pacemaker's view
+         crm_master -l reboot -v 100
+         return $OCF_RUNNING_MASTER
+       ;;
+
+       ready)
+         crm_master -l reboot -v 5
+            # must take over
+       ;;
+
+        *)
+    esac
+    return $OCF_SUCCESS
+}
+
+qpid_start() {
+    local rc
+
+    qpid_status
+    rc=$?
+    if [ $rc -eq $OCF_SUCCESS ]; then
+        ocf_log info "qpid  already running"
+        return $OCF_SUCCESS
+    fi
+
+    # run the actual qpid daemon. Don't use ocf_run as we're sending the tool's output
+    # straight to /dev/null anyway and using ocf_run would break stdout-redirection here.
+    #su ${OCF_RESKEY_user} -s /bin/sh -c "${OCF_RESKEY_binary} --config-file=$OCF_RESKEY_config \
+    #   "' >> /dev/null 2>&1 & echo $!' > $OCF_RESKEY_pid
+    service qpidd start
+    # Spin waiting for the server to come up.
+    # Let the CRM/LRM time us out if required
+    while true; do
+    qpid_monitor
+    rc=$?
+    [ $rc -eq $OCF_SUCCESS ] && break
+    [ $rc -eq $OCF_RUNNING_MASTER ] && break
+    if [ $rc -ne $OCF_NOT_RUNNING ]; then
+        ocf_log err "qpid start failed"
+        exit $OCF_ERR_GENERIC
+    fi
+    sleep 1
+    done
+
+    ocf_log info "qpid started"
+    return $OCF_SUCCESS
+}
+
+qpid_stop() {
+    local rc
+    local pid
+
+    qpid_status
+    rc=$?
+    if [ $rc -eq $OCF_NOT_RUNNING ]; then
+        ocf_log info "qpid  already stopped"
+        return $OCF_SUCCESS
+    fi
+
+    # Try SIGTERM
+    pid=`cat $OCF_RESKEY_pid`
+    ocf_run kill -s TERM $pid
+    rc=$?
+    if [ $rc -ne 0 ]; then
+        ocf_log err "qpid couldn't be stopped"
+        exit $OCF_ERR_GENERIC
+    fi
+
+    # stop waiting
+    shutdown_timeout=15
+    count=0
+    while [ $count -lt $shutdown_timeout ]; do
+        qpid_status
+        rc=$?
+        if [ $rc -eq $OCF_NOT_RUNNING ]; then
+            break
+        fi
+        count=`expr $count + 1`
+        sleep 1
+        ocf_log debug "qpid still hasn't stopped yet. Waiting ..."
+    done
+
+    qpid_status
+    rc=$?
+    if [ $rc -ne $OCF_NOT_RUNNING ]; then
+        # SIGTERM didn't help either, try SIGKILL
+        ocf_log info "qpid failed to stop after ${shutdown_timeout}s \
+          using SIGTERM. Trying SIGKILL ..."
+        ocf_run kill -s KILL $pid
+    fi
+
+    ocf_log info "OpenStack Nova API (qpid) stopped"
+
+    rm -f $OCF_RESKEY_pid
+
+    return $OCF_SUCCESS
+}
+
+qpid_ha_status() {
+    local output
+
+    output=$(qpid-ha status)
+    if [ $? != 0 ]
+    then
+        echo "Down/Off"
+        return 1 
+    fi
+
+    echo "$output"
+}
+qpid_demote(){
+  return $OCF_SUCCESS
+}
+qpid_promote() {
+    # we run this twice as after a crash of the other node
+    # within HADR_TIMEOUT the status may be still reported as Peer
+    # although a connection no longer exists
+    local i hadr output force	
+        hadr=$(qpid_ha_status) || return $OCF_ERR_GENERIC
+        ocf_log info "QPID $instance($db2node)/$db has HADR status $hadr and will be promoted"
+
+        case "$hadr" in
+            joining)
+            # this case only to keep ocf-tester happy
+
+            ;;
+
+            active)
+            # nothing to do, only update pacemaker's view
+            return $OCF_SUCCESS 
+            ;;
+
+            ready)
+            # must take over 
+            ;;
+
+            *)
+            return $OCF_ERR_GENERIC
+        esac
+
+        if output=$(qpid-ha promote)
+        then
+
+            ocf_log info "++++++++++++qpid promote"
+            return $OCF_SUCCESS
+        fi
+
+    return $OCF_ERR_GENERIC
+}
+#######################################################################
+
+case "$1" in
+  meta-data)    meta_data
+                exit $OCF_SUCCESS;;
+  usage|help)   usage
+                exit $OCF_SUCCESS;;
+esac
+
+# Anything except meta-data and help must pass validation
+qpid_validate || exit $?
+
+# What kind of method was invoked?
+case "$1" in
+  start)        qpid_start;;
+  stop)         qpid_stop;;
+  status)       qpid_status;;
+  monitor)      qpid_monitor;;
+  promote)      qpid_promote;;
+  demote)       qpid_demote;;
+  validate-all) ;;
+  *)            usage
+#                exit $OCF_ERR_UNIMPLEMENTED;;
+esac
+

@@ -1,0 +1,248 @@
+{
+  "name": "env.name",
+  "description": "",
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "override_attributes": {
+    "pacemaker": {
+      "cluster": {
+        "endpoints": pacemaker.cluster.endpoints,
+        "haproxy": pacemaker.cluster.haproxy
+      }
+    },
+    "openstack": {
+      "ha": {
+        "enabled": true,
+        "resource_manager": "pacemaker",
+        "endpoints": {
+          "vip": "openstack.ha.endpoints.vip"  
+        }
+      },
+      "developer_mode": true,
+      "yum": {
+        "rdo_enabled": false
+      },
+      "mq": {
+        "service_type": "openstack.mq.service_type",
+        "image": {
+          "notifier_strategy": "openstack.mq.service_type"
+        },
+        "qpid": {
+          "vip": "openstack.mq.qpid.vip",
+          "nodes": openstack.mq.qpid.nodes
+        }
+      },
+      "db": {
+        "service_type": "openstack.db.service_type",
+        "compute": {
+          "db_name": "openstack.db.db2.db_name",
+          "username": "openstack.db.compute.username"
+        },
+        "identity": {
+          "db_name": "openstack.db.db2.db_name",
+          "username": "openstack.db.identity.username"
+        },
+        "image": {
+          "db_name": "openstack.db.db2.db_name",
+          "username": "openstack.db.image.username"
+        },
+        "network": {
+          "db_name": "openstack.db.db2.db_name",
+          "username": "openstack.db.network.username"
+        },
+        "block-storage": {
+          "db_name": "openstack.db.db2.db_name",
+          "username": "openstack.db.block-storage.username"
+        },
+        "dashboard": {
+          "db_name": "openstack.db.db2.db_name",
+          "username": "openstack.db.dashboard.username"
+        },
+        "telemetry": {
+          "nosql": {
+            "used": true
+          },
+          "db_name": "openstack.db.db2.db_name",
+          "username": "openstack.db.telemetry.username"
+        },
+        "orchestration": {
+          "db_name": "openstack.db.db2.db_name",
+          "username": "openstack.db.orchestration.username"
+        },
+        "db2": {
+          "version": "10.5",
+          "vip": "openstack.db.db2.vip",
+          "db_name": "openstack.db.db2.db_name",
+          "primary_host": "openstack.db.db2.primary_host",
+          "standby_host": "openstack.db.db2.standby_host",
+          "url": "openstack.db.db2.url",
+          "odbc_url": "openstack.db.db2.odbc_url"
+        }
+      },
+      "compute": {
+        "enabled_apis": "osapi_compute,metadata",
+        "driver": "nova.virt.libvirt.LibvirtDriver",
+        "network": {
+          "service_type": "neutron",
+          "plugins": ["openvswitch"]
+        }
+      },
+      "block-storage": {
+        "volume": {
+          "create_volume_group": false
+        }
+      },
+      "image": {
+        "upload_images": openstack.image.upload_images,
+        "upload_image": {
+          "precise": "openstack.image.upload_image.precise",
+          "cirros": "openstack.image.upload_image.cirros"
+        }
+      },
+      "network": {
+        "db_stamp": "havana",
+        "platform": {
+          "neutron_openvswitch_packages": ["kmod-openvswitch", "openvswitch"]
+        },
+        "use_namespaces": "False",
+        "service_plugins": ["router"],
+        "ml2": {
+          "type_drivers": "gre",
+          "tunnel_id_ranges": "1:1000",
+          "tenant_network_types": "gre",
+          "mechanism_drivers": "openvswitch",
+          "enable_security_group": "True"
+        },
+        "metadata": {
+          "nova_metadata_ip": "openstack.endpoints.compute-api.host"
+        },
+        "l3": {
+          "external_network_bridge_interface": "eth9"
+        },
+        "openvswitch": {
+          "tunnel_type": "gre",
+          "enable_tunneling": "True",
+          "tenant_network_type": "gre",
+          "tunnel_id_ranges": "1:1000",
+          "enable_security_group": "True",
+          "local_ip_interface": "openstack.network.openvswitch.local_ip_interface"
+        }
+      },
+      "dashboard": {
+        "platform": {
+          "horizon_packages": ["openstack-dashboard", "python-mox"]
+        }
+      },
+      "endpoints": {
+        "bind-host": "0.0.0.0",
+        "db": {
+          "host": "openstack.db.db2.vip",
+          "port": "openstack.endpoints.db.port"
+        },
+        "mq": {
+          "host": "openstack.mq.qpid.vip",
+          "port": "openstack.endpoints.mq.port"
+        },
+        "identity-api": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.identity-api.nodes
+        },
+        "identity-admin": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.identity-api.nodes
+        },
+        "compute-api": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.compute-api.nodes
+        },
+        "compute-ec2-api": {
+          "ha_enabled": false,
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.compute-api.nodes
+        },
+        "compute-ec2-admin": {
+          "ha_enabled": false,
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.compute-api.nodes
+        },
+        "compute-xvpvnc": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.compute-api.nodes
+        },
+        "compute-novnc": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.compute-api.nodes
+        },
+        "network-api": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.network-api.nodes
+        },
+        "image-api": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.image-api.nodes
+        },
+        "image-registry": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.image-api.nodes
+        },
+        "block-storage-api": {
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.block-storage-api.nodes
+        },
+        "object-storage-api": {
+          "ha_enabled": false,
+          "host": "127.0.0.1"
+        },
+        "orchestration-api": {
+          "ha_enabled": false,
+          "host": "127.0.0.1"
+        },
+        "orchestration-api-cfn": {
+          "ha_enabled": false,
+          "host": "127.0.0.1"
+        },
+        "orchestration-api-cloudwatch": {
+          "ha_enabled": false,
+          "host": "127.0.0.1"
+        },
+        "telemetry-api": {
+          "ha_enabled": false,
+          "host": "openstack.ha.endpoints.vip",
+          "nodes": openstack.endpoints.telemtry-api.nodes
+        }
+      },
+      "secret": {
+        "key_path": "/etc/chef/encrypted_data_bag_secret"
+      }
+    },
+    "mysql": {
+      "bind_address": "0.0.0.0",
+      "tunable": {
+        "skip-name-resolve": true
+      },
+      "allow_remote_root": false,
+      "remove_anonymous_users": true,
+      "server_root_password": "password"
+    },
+    "yum": {
+      "repo": [
+        {
+          "name": "rhel",
+          "url": "yum.repo.rhel"
+        },
+        {
+          "name": "epel",
+          "url": "yum.repo.epel"
+        },
+        {
+          "name": "openstack-noarch",
+          "url": "yum.repo.openstack.noarch"
+        },
+        {
+          "name": "openstack-x86_64",
+          "url": "yum.repo.openstack.x86_64"
+        }
+      ]
+    }
+  }
+}

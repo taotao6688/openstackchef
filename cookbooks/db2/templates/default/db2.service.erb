@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# db2.service   Start up DB2
+#
+# chkconfig: 2345 27 23
+# description: DB2 is a software from IBM.
+
+
+case $1 in
+
+  start)
+    su - <%= @params['instance_username'] %> -c 'db2start'
+    ;;
+
+  stop)
+    su - <%= @params['instance_username'] %> -c 'db2stop'
+    ;;
+
+esac
+
+exit 0

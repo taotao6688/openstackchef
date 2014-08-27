@@ -1,0 +1,20 @@
+#! /bin/bash
+#
+# db2.nosql.service Start up on DB2
+#
+# chkconfig: 2345 29 23
+# description: this script will start the wire listener for DB2 NoSQL.
+
+case $1 in
+
+  start)
+    su - <%= @instance_username %> -c 'export JAVA_HOME=<%= @java_home %> && cd <%= @db2_dir %>/json/bin && nohup ./wplistener.sh -start -logPath <%= @logPath %> -mongoPort <%= @database_mongo_port %> -userid <%= @database_username %> -password <%= @database_user_password %> -dbName <%= @database_name %> 2>&1 &'
+    ;;
+
+  stop)
+    su - <%= @instance_username %> -c 'export JAVA_HOME=<%= @java_home %> && cd <%= @db2_dir %>/json/bin && ./wplistener.sh -shutdown -logPath <%= @logPath %> -noSQLHost <%= @noSQLHost %> -mongoPort <%= @database_mongo_port %> -userid <%= @database_username %> -dbName <%= @database_name %>'
+    ;;
+
+esac
+
+exit 0

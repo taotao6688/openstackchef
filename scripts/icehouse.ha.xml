@@ -1,0 +1,142 @@
+<!-- VIM :set ts=2 sts=2 sw=2 et -->
+<!-- Copy this file, and edit the copy. -->
+<cluster>
+  <environment
+env.name="icehouse_ha"
+node.username="root"
+node.password=""
+node.ssh_key="/root/.ssh/id_rsa"
+
+openstack.ha.keepalived_vrrp_iface="eth0"
+
+openstack.mq.service_type="qpid"
+openstack.db.service_type="db2"
+openstack.db.db2.db_name="openstac"
+openstack.db.db2.primary_host="172.16.1.220"
+openstack.db.db2.standby_host="172.16.1.219"
+openstack.db.db2.url="http://172.16.0.1:8800/static/db2/v10.5fp3_linuxx64_server.tar.gz"
+openstack.db.db2.odbc_url="http://172.16.0.1:8800/static/db2/v10.5fp3_linuxx64_odbc_cli.tar.gz"
+openstack.db.compute.username="nova1"
+openstack.db.identity.username="keyston1"
+openstack.db.image.username="glance1"
+openstack.db.network.username="neutron1"
+openstack.db.block-storage.username="cinder1"
+openstack.db.dashboard.username="horizon1"
+openstack.db.telemetry.username="ceilome1"
+openstack.db.orchestration.username="heat1"
+
+openstack.endpoints.db.port="50000"
+openstack.mq.qpid.vip="172.16.1.241"
+openstack.mq.qpid.nodes='["172.16.1.225", "172.16.1.226"]'
+
+openstack.endpoints.mq.port="5672"
+openstack.db.db2.vip="172.16.1.242"
+
+openstack.ha.endpoints.vip="172.16.1.240"
+
+openstack.endpoints.identity-api.nodes='["172.16.1.221", "172.16.1.222"]'
+openstack.endpoints.compute-api.nodes='["172.16.1.229", "172.16.1.230"]'
+openstack.endpoints.network-api.nodes='["172.16.1.235", "172.16.1.236"]'
+openstack.endpoints.image-api.nodes='["172.16.1.227", "172.16.1.228"]'
+openstack.endpoints.block-storage-api.nodes='["172.16.1.233", "172.16.1.234"]'
+openstack.endpoints.telemtry-api.nodes='["172.16.1.231", "172.16.1.232"]'
+
+openstack.network.openvswitch.local_ip_interface="eth0"
+
+openstack.image.upload_images='["cirros", "precise"]'
+openstack.image.upload_image.precise="http://172.16.0.1:8800/static/images/precise-server-cloudimg-amd64-disk1.img"
+openstack.image.upload_image.cirros="http://172.16.0.1:8800/static/images/cirros-0.3.0-x86_64-uec.tar.gz"
+
+yum.repo.rhel="http://172.16.0.1:8800/rhel/6Server"
+yum.repo.epel="http://172.16.0.1:8800/epel/6Server"
+yum.repo.openstack.noarch="http://172.16.0.1:8800/openstack/icehouse/D20140423-2052/noarch"
+yum.repo.openstack.x86_64="http://172.16.0.1:8800/openstack/icehouse/D20140423-2052/x86_64"
+/>
+  <nodes>
+    <node>
+      <host>172.16.1.223</host>
+      <roles>os-endpoints</roles>
+    </node>
+    <node>
+      <host>172.16.1.224</host>
+      <roles>os-endpoints-cluster</roles>
+    </node>
+    <node>
+      <host>172.16.1.220</host>
+      <roles>os-ops-database,ibm-db2-primary</roles>
+    </node>
+    <node>
+      <host>172.16.1.219</host>
+      <roles>os-ops-database,ibm-db2-standby</roles>
+    </node>
+    <node>
+      <host>172.16.1.221</host>
+      <roles>os-identity</roles>
+    </node>
+    <node>
+      <host>172.16.1.222</host>
+      <roles>os-identity-cluster</roles>
+    </node>
+    <node>
+      <host>172.16.1.225</host>
+      <roles>ibm-qpid-active</roles>
+    </node>
+    <node>
+      <host>172.16.1.226</host>
+      <roles>ibm-qpid-passive</roles>
+    </node>
+    <node>
+      <host>172.16.1.227</host>
+      <roles>os-image,os-image-upload</roles>
+    </node>
+    <node>
+      <host>172.16.1.228</host>
+      <roles>os-image-cluster</roles>
+    </node>
+    <node>
+      <host>172.16.1.235</host>
+      <roles>os-network</roles>
+    </node>
+    <node>
+      <host>172.16.1.236</host>
+      <roles>os-network-server</roles>
+    </node>
+    <node>
+      <host>172.16.1.229</host>
+      <roles>os-compute-setup,os-compute-controller</roles>
+    </node>
+    <node>
+      <host>172.16.1.230</host>
+      <roles>os-compute-controller</roles>
+    </node>
+    <node>
+      <host>172.16.1.233</host>
+      <roles>os-block-storage</roles>
+    </node>
+    <node>
+      <host>172.16.1.234</host>
+      <roles>os-block-storage-cluster</roles>
+    </node>
+    <node>
+      <host>172.16.1.25</host>
+        <roles>os-compute-worker,os-network-openvswitch</roles>
+    </node>
+  </nodes>
+  <order sequence="set1,set2,set3,set4,set5,set6,set7,set8,set9,set10,set11,set12,set13">
+    <set1>os-ops-database,os-endpoints,ibm-qpid-active</set1>
+    <set2>os-endpoints-cluster,ibm-db2-primary,ibm-qpid-passive</set2>
+    <set3>ibm-db2-standby</set3>
+    <set3>os-identity</set3>
+    <set4>os-identity-cluster</set4>
+    <set5>os-image,os-block-storage</set5>
+    <set6>os-image-cluster,os-block-storage-cluster</set6>
+    <set7>os-compute-setup,os-image-upload</set7>
+    <set8>os-compute-controller</set8>
+    <set9>os-network</set9>
+    <set10>os-network-server</set10>
+    <set11>os-network-dhcp-agent,os-network-openvswitch,os-network-metadata-agent</set11>
+    <set12>os-compute-worker,os-block-storage-volume,os-dashboard</set12>
+    <set13>os-telemetry-api,os-telemetry-agent-central,os-telemetry-collector</set13>
+    <set14>os-telemetry-agent-compute</set14>
+  </order>
+</cluster>

@@ -1,0 +1,23 @@
+<cluster config_version="14" name="<%= @params["cluster_name"] %>">
+  <fence_daemon/>
+  <clusternodes>
+    <% @params['cluster_nodes'].each_with_index do |node, index| %>
+    <clusternode name="<%= node %>" nodeid="<%= index+1 %>">
+      <fence>
+        <method name="pcmk-redirect">
+          <device name="pcmk" port="<%= node %>"/>
+        </method>
+      </fence>
+    </clusternode>
+    <% end %>
+  </clusternodes>
+  <cman/>
+  <fencedevices>
+    <fencedevice agent="fence_pcmk" name="pcmk"/>
+  </fencedevices>
+  <rm>
+    <failoverdomains/>
+    <resources/>
+  </rm>
+</cluster>
+

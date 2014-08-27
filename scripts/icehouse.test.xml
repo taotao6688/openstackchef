@@ -1,0 +1,90 @@
+<!-- VIM :set ts=2 sts=2 sw=2 et -->
+<!-- Copy this file, and edit the copy. -->
+<cluster>
+  <environment
+env.name="icehouse_test"
+node.username="root"
+node.password=""
+node.ssh_key="/root/.ssh/id_rsa"
+
+pacemaker.cluster.endpoints='[]'
+pacemaker.cluster.haproxy='[]'
+
+openstack.ha.resource_manager="pacemaker"
+
+openstack.mq.service_type="qpid"
+openstack.db.service_type="mysql"
+openstack.db.db_name="openstac"
+openstack.db.vip="10.0.1.160"
+
+openstack.db.compute.db_name="nova"
+openstack.db.compute.username="nova1"
+openstack.db.identity.db_name="keyston"
+openstack.db.identity.username="keyston1"
+openstack.db.image.db_name="glance"
+openstack.db.image.username="glance1"
+openstack.db.network.db_name="neutron"
+openstack.db.network.username="neutron1"
+openstack.db.block-storage.db_name="cinder"
+openstack.db.block-storage.username="cinder1"
+openstack.db.dashboard.db_name="horizon"
+openstack.db.dashboard.username="horizon1"
+openstack.db.telemetry.db_name="ceilome"
+openstack.db.telemetry.username="ceilome1"
+openstack.db.orchestration.db_name="heat"
+openstack.db.orchestration.username="heat1"
+
+openstack.endpoints.db.nodes='["10.0.1.160"]'
+openstack.endpoints.db.port="3306"
+openstack.endpoints.db.ha_enabled="true"
+
+openstack.mq.qpid.vip="10.0.1.160"
+openstack.mq.qpid.nodes='["10.0.1.160"]'
+openstack.endpoints.mq.port="5672"
+
+openstack.ha.endpoints.vip="10.0.1.160"
+openstack.ha.nodes='[]'
+
+openstack.endpoints.identity-api.nodes='["10.0.1.160"]'
+openstack.endpoints.compute-api.host="10.0.1.160"
+openstack.endpoints.compute-api.nodes='["10.0.1.160"]'
+openstack.endpoints.network-api.nodes='["10.0.1.160"]'
+openstack.endpoints.image-api.nodes='["10.0.1.160"]'
+openstack.endpoints.block-storage-api.nodes='["10.0.1.160"]'
+openstack.endpoints.telemtry-api.nodes='["10.0.1.160"]'
+openstack.endpoints.orchestration-api.nodes='["10.0.1.160"]'
+openstack.endpoints.orchestration-api-cfn.nodes='["10.0.1.160"]'
+openstack.endpoints.orchestration-api-cloudwatch.nodes='["10.0.1.160"]'
+
+openstack.network.openvswitch.local_ip_interface="eth1"
+openstack.network.l3.external_network_bridge_interface="eth0"
+
+openstack.image.upload_images='["cirros", "precise"]'
+openstack.image.upload_image.precise="http://9.186.106.39:8081/static/images/precise-server-cloudimg-amd64-disk1.img"
+openstack.image.upload_image.cirros="http://9.186.106.39:8081/static/images/cirros-0.3.0-x86_64-uec.tar.gz"
+
+yum.repo.rhel="ftp://yuezhy%40cn.ibm.com:zhangyue123@ftp3-ca.linux.ibm.com/redhat/abat_yum/rhel-6-u5/"
+yum.repo.epel="http://dl.fedoraproject.org/pub/epel/6Server/x86_64"
+yum.repo.openstack.noarch="http://9.186.106.39:8081/osee/D20140623-0132-2014-1-1-ibm-rc2-KEEP/noarch"
+yum.repo.openstack.x86_64="http://9.186.106.39:8081/osee/D20140623-0132-2014-1-1-ibm-rc2-KEEP/x86_64/"
+/>
+
+  <nodes>
+    <node>
+      <host>test</host>
+      <roles>mysql,openstack-db,os-ops-messaging,os-identity,os-image,os-network,os-network-l3-agent,os-compute-setup,os-compute-api,os-compute-scheduler,os-compute-conductor,os-compute-vncproxy,os-compute-cert,os-compute-setup,os-block-storage,os-orchestration,os-compute-worker,os-dashboard</roles>
+    </node>
+  </nodes>
+
+  <order sequence="set1,set2,set3,set4,set5,set6,set7,set8,set9">
+    <set1>pacemaker</set1>
+    <set2>mysql,mysql-ha,qpid-ha,os-ops-messaging,haproxy-ha</set2>
+    <set3>pacemaker-mysql-config,pacemaker-qpid-config,pacemaker-haproxy-config</set3>
+    <set4>openstack-db</set4>
+    <set5>os-identity</set5>
+    <set6>os-image,os-network,os-block-storage,os-compute-setup</set6>
+    <set7>os-compute-api,os-compute-scheduler,os-compute-conductor,os-compute-vncproxy,os-compute-cert,os-orchestration</set7>
+    <set8>os-network-openvswitch,pacemaker-endpoints-deploy</set8>
+    <set9>os-compute-worker,os-dashboard,pacemaker-endpoints-config</set9>
+  </order>
+</cluster>

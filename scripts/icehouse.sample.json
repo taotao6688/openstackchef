@@ -1,0 +1,207 @@
+{
+  "name": "icehouse",
+  "description": "",
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "override_attributes": {
+    "openstack": {
+      "developer_mode": true,
+      "yum": {
+        "rdo_enabled": false
+      },
+      "mq": {
+        "service_type": "qpid",
+        "image": {
+          "notifier_strategy": "qpid"
+        }
+      },
+      "db": {
+        "service_type": "db2",
+        "compute": {
+          "db_name": "openstac",
+          "username": "nova1"
+        },
+        "identity": {
+          "db_name": "openstac",
+          "username": "keyston1"
+        },
+        "image": {
+          "db_name": "openstac",
+          "username": "glance1"
+        },
+        "network": {
+          "db_name": "openstac",
+          "username": "neutron1"
+        },
+        "block-storage": {
+          "db_name": "openstac",
+          "username": "cinder1"
+        },
+        "dashboard": {
+          "db_name": "openstac",
+          "username": "horizon1"
+        },
+        "telemetry": {
+          "nosql": {
+            "used": true
+          },
+          "db_name": "openstac",
+          "username": "ceilome1"
+        },
+        "orchestration": {
+          "db_name": "openstac",
+          "username": "heat1"
+        },
+        "db2": {
+          "version": "10.5",
+          "url": "http://172.16.0.1:8800/static/db2/DB2_Svr_10.5.0.1_Linux_x86-64.tar.gz",
+          "odbc_url": "http://172.16.0.1:8800/static/db2/v10.5fp3_linuxx64_odbc_cli.tar.gz"
+        }
+      },
+      "compute": {
+        "enabled_apis": "osapi_compute,metadata",
+        "driver": "nova.virt.libvirt.LibvirtDriver",
+        "network": {
+          "service_type": "neutron",
+          "plugins": ["openvswitch"]
+        }
+      },
+      "block-storage": {
+        "volume": {
+          "create_volume_group": false
+        }
+      },
+      "image": {
+        "upload_images": ["cirros", "precise"],
+        "upload_image": {
+          "precise": "http://172.16.0.1:8800/static/images/precise-server-cloudimg-amd64-disk1.img",
+          "cirros": "http://172.16.0.1:8800/static/images/cirros-0.3.0-x86_64-uec.tar.gz"
+        }
+      },
+      "network": {
+        "db_stamp": "havana",
+        "platform": {
+          "neutron_openvswitch_packages": ["kmod-openvswitch", "openvswitch"]
+        },
+        "use_namespaces": "False",
+        "service_plugins": ["router"],
+        "ml2": {
+          "type_drivers": "gre",
+          "tunnel_id_ranges": "1:1000",
+          "tenant_network_types": "gre",
+          "mechanism_drivers": "openvswitch",
+          "enable_security_group": "True"
+        },
+        "metadata": {
+          "nova_metadata_ip": "172.16.1.229"
+        },
+        "l3": {
+          "external_network_bridge_interface": "eth1"
+        },
+        "openvswitch": {
+          "tunnel_type": "gre",
+          "enable_tunneling": "True",
+          "tenant_network_type": "gre",
+          "tunnel_id_ranges": "1:1000",
+          "enable_security_group": "True",
+          "local_ip_interface": "eth0"
+        }
+      },
+      "dashboard": {
+        "platform": {
+          "horizon_packages": ["openstack-dashboard", "python-mox"]
+        }
+      },
+      "endpoints": {
+        "bind-host": "0.0.0.0",
+        "db": {
+          "host": "172.16.1.220",
+          "port": "50000"
+        },
+        "mq": {
+          "host": "172.16.1.225",
+          "port": "5672"
+        },
+        "identity-api": {
+          "host": "172.16.1.221"
+        },
+        "identity-admin": {
+          "host": "172.16.1.221"
+        },
+        "compute-api": {
+          "host": "172.16.1.229"
+        },
+        "compute-ec2-api": {
+          "host": "172.16.1.229"
+        },
+        "compute-ec2-admin": {
+          "host": "172.16.1.229"
+        },
+        "compute-xvpvnc": {
+          "host": "172.16.1.229"
+        },
+        "compute-novnc": {
+          "host": "172.16.1.229"
+        },
+        "compute-vnc": {
+          "host": "172.16.1.229"
+        },
+        "network-api": {
+          "host": "172.16.1.235"
+        },
+        "image-api": {
+          "host": "172.16.1.227"
+        },
+        "image-registry": {
+          "host": "172.16.1.227"
+        },
+        "block-storage-api": {
+          "host": "172.16.1.233"
+        },
+        "object-storage-api": {
+          "host": "127.0.0.1"
+        },
+        "orchestration-api": {
+          "host": "127.0.0.1"
+        },
+        "orchestration-api-cfn": {
+          "host": "127.0.0.1"
+        },
+        "orchestration-api-cloudwatch": {
+          "host": "127.0.0.1"
+        },
+        "telemetry-api": {
+          "host": "172.16.1.231"
+        }
+      },
+      "secret": {
+        "key_path": "/etc/chef/encrypted_data_bag_secret"
+      }
+    },
+    "mysql": {
+      "bind_address": "0.0.0.0",
+      "tunable": {
+        "skip-name-resolve": true
+      },
+      "allow_remote_root": false,
+      "remove_anonymous_users": true,
+      "server_root_password": "password"
+    },
+    "yum": {
+      "repo": [
+        {
+          "name": "rhel",
+          "url": "http://172.16.0.1:8800/redhat/rhel/6Server/x86_64"
+        },
+        {
+          "name": "epel",
+          "url": "http://172.16.0.1:8800/redhat/epel/6Server/x86_64"
+        },
+        {
+          "name": "openstack",
+          "url": "http://172.16.0.1:8800/openstack/icehouse/D20140327-0830"
+        }
+      ]
+    }
+  }
+}

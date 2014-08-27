@@ -1,0 +1,21 @@
+{
+  "name": "db2",
+  "description": "The db2 Chef environment",
+  "override_attributes": {
+    "db2": {
+      "version": "10.5",
+      "port": 50000,
+      "url": "http://172.16.0.1:8800/static/db2/DB2_Svr_10.5.0.1_Linux_x86-64.tar.gz",
+      "odbc_url": "http://172.16.0.1:8800/static/db2/v10.5fp3_linuxx64_odbc_cli.tar.gz",
+      "db_name": "dbname",
+      "db_user": "dbuser",
+      "db_pass": "password",
+      "database_data_dir": "/home/db2inst1",
+      "download_dir": "/tmp",
+      "primary_host": "172.16.1.220",
+      "standby_host": "172.16.1.219",
+      "primary_port": 10000,
+      "standby_port": 10000
+    }
+  }
+}

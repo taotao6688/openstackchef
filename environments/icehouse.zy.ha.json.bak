@@ -1,0 +1,216 @@
+{
+  "name": "icehouse.zy.ha",
+  "description": "",
+  "json_class": "Chef::Environment",
+  "chef_type": "environment",
+  "override_attributes": {
+    "openstack": {
+      "developer_mode": true,
+      "yum": {
+        "rdo_enabled": false
+      },
+      "mq": {
+        "service_type": "qpid",
+        "image": {
+          "notifier_strategy": "qpid"
+        }
+      },
+      "db": {
+        "service_type": "db2",
+        "compute": {
+          "db_name": "openstack.db.compute.db_name",
+          "username": "nova1"
+        },
+        "identity": {
+          "db_name": "openstack.db.identity.db_name",
+          "username": "keyston1"
+        },
+        "image": {
+          "db_name": "openstack.db.image.db_name",
+          "username": "glance1"
+        },
+        "network": {
+          "db_name": "openstack.db.network.db_name",
+          "username": "neutron1"
+        },
+        "block-storage": {
+          "db_name": "openstack.db.block-storage.db_name",
+          "username": "cinder1"
+        },
+        "dashboard": {
+          "db_name": "openstack.db.dashboard.db_name",
+          "username": "horizon1"
+        },
+        "telemetry": {
+          "nosql": {
+            "used": true
+          },
+          "db_name": "openstack.db.telemetry.db_name",
+          "username": "ceilome1"
+        },
+        "orchestration": {
+          "db_name": "openstack.db.orchestration.db_name",
+          "username": "heat1"
+        },
+        "db2": {
+          "version": "10.5",
+          "url": "http://10.0.1.20:8081/static/db2/DB2_Svr_10.5.0.1_Linux_x86-64.tar.gz",
+          "odbc_url": "http://10.0.1.20:8081/static/db2/v10.5fp3_linuxx64_odbc_cli.tar.gz"
+        }
+      },
+      "compute": {
+        "enabled_apis": "osapi_compute,metadata",
+        "driver": "nova.virt.libvirt.LibvirtDriver",
+        "network": {
+          "service_type": "neutron",
+          "plugins": ["openvswitch"]
+        }
+      },
+      "block-storage": {
+        "volume": {
+          "create_volume_group": false
+        }
+      },
+      "image": {
+        "upload_images": ["cirros", "precise"],
+        "upload_image": {
+          "precise": "http://10.0.1.20:8081/static/images/precise-server-cloudimg-amd64-disk1.img",
+          "cirros": "http://10.0.1.20:8081/static/images/cirros-0.3.0-x86_64-uec.tar.gz"
+        }
+      },
+      "network": {
+        "db_stamp": "havana",
+        "platform": {
+          "neutron_openvswitch_packages": ["kmod-openvswitch", "openvswitch"]
+        },
+        "use_namespaces": "True",
+        "service_plugins": ["router"],
+        "ml2": {
+          "type_drivers": "flat",
+          "tenant_network_types": "flat",
+          "flat_networks": "*",
+          "mechanism_drivers": "openvswitch",
+          "enable_security_group": "True"
+        },
+        "metadata": {
+          "nova_metadata_ip": "openstack.endpoints.controller.host"
+        },
+        "l3": {
+          "external_network_bridge_interface": "eth9"
+        },
+        "dhcp": {
+          "enable_isolated_metadata": "True"
+        },
+        "platform": {
+          "neutron_client_packages": ["python-neutronclient", "iproute"]
+        },
+        "openvswitch": {
+          "enable_tunneling": "False",
+          "tenant_network_type": "flat",
+          "tunnel_type": "flat",
+          "enable_security_group": "True",
+          "bridge_mappings": "openstack.network.openvswitch.bridge_mappings"
+        }
+      },
+      "dashboard": {
+        "platform": {
+          "horizon_packages": ["openstack-dashboard", "python-mox"]
+        }
+      },
+      "endpoints": {
+        "bind-host": "0.0.0.0",
+        "db": {
+          "host": "openstack.endpoints.db.host",
+          "port": "50000"
+        },
+        "mq": {
+          "host": "openstack.endpoints.mq.host",
+          "port": "5672"
+        },
+        "identity-api": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "identity-admin": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "compute-api": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "compute-ec2-api": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "compute-ec2-admin": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "compute-xvpvnc": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "compute-novnc": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "compute-vnc": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "network-api": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "image-api": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "image-registry": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "block-storage-api": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "object-storage-api": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "orchestration-api": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "orchestration-api-cfn": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "orchestration-api-cloudwatch": {
+          "host": "openstack.endpoints.controller.host"
+        },
+        "telemetry-api": {
+          "host": "openstack.endpoints.controller.host"
+        }
+      },
+      "secret": {
+        "key_path": "/etc/chef/encrypted_data_bag_secret"
+      }
+    },
+    "mysql": {
+      "bind_address": "0.0.0.0",
+      "tunable": {
+        "skip-name-resolve": true
+      },
+      "allow_remote_root": false,
+      "remove_anonymous_users": true,
+      "server_root_password": "password"
+    },
+    "yum": {
+      "repo": [
+        {
+          "name": "rhel",
+          "url": "ftp://ftp3.linux.ibm.com/redhat/abat_yum/rhel-6-u5/"
+        },
+        {
+          "name": "epel",
+          "url": "http://dl.fedoraproject.org/pub/epel/6Server/x86_64"
+        },
+        {
+          "name": "openstack-noarch",
+          "url": "http://rchgsa.ibm.com/projects/e/emsol/ccs/build/driver/osee-icehouse/openstack/D20140513-2014-rtc-182510/noarch/"
+        },
+        {
+          "name": "openstack-x86_64",
+          "url": "http://rchgsa.ibm.com/projects/e/emsol/ccs/build/driver/osee-icehouse/openstack/D20140513-2014-rtc-182510/x86_64"
+        }
+      ]
+    }
+  }
+}

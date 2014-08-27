@@ -1,0 +1,4 @@
+[gerrit]
+host=gerrit.rtp.raleigh.ibm.com
+port=29418
+project=openstack-es/cookbook-db2.git

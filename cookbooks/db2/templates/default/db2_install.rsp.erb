@@ -1,0 +1,58 @@
+*-----------------------------------------------------
+* Generated response file used by the DB2 Setup wizard
+*-----------------------------------------------------
+*  Product Installation
+LIC_AGREEMENT   = ACCEPT
+
+<% if @params['version'] == '9.7' or @params['version'] == '10.1' %>
+** PROD keyword changed to DB2_SERVER_EDITION since version 10.5
+** http://pic.dhe.ibm.com/infocenter/db2luw/v10r5/topic/com.ibm.db2.luw.qb.server.doc/doc/r0060066.html
+PROD            = ENTERPRISE_SERVER_EDITION
+<% else %>
+PROD            = DB2_SERVER_EDITION
+<% end %>
+FILE            = /opt/ibm/db2/V<%= @params['version'] %>
+INSTALL_TYPE    = TYPICAL
+
+*-----------------------------------------------
+*  Das properties
+*-----------------------------------------------
+DAS_CONTACT_LIST    = LOCAL
+DAS_USERNAME        = <%= @params['das_username'] %>
+DAS_GROUP_NAME      = <%= @params['das_username'] %>
+DAS_HOME_DIRECTORY  = /home/<%= @params['das_username'] %>
+DAS_PASSWORD        = <%= @params['das_password'] %>
+
+<% if @params['version'] == '9.7' %>
+INSTALL_TSAMP = NO
+** This keyword is deprecated after DB2 v9.7
+** IBM Tivoli System Automation for Multiplatforms Base Component (Tivoli SA MP)
+<% end %>
+
+* ----------------------------------------------
+*  Instance properties
+* ----------------------------------------------
+INSTANCE                       = DB2_INST
+DB2_INST.TYPE                  = <%= @params['instance_type'] %>
+DB2_INST.AUTOSTART             = YES
+DB2_INST.START_DURING_INSTALL  = YES
+*  Instance-owning user
+DB2_INST.NAME                  = <%= @params['instance_username'] %>
+DB2_INST.GROUP_NAME            = <%= @params['instance_username'] %>
+DB2_INST.HOME_DIRECTORY        = /home/<%= @params['instance_username'] %>
+DB2_INST.PASSWORD              = <%= @params['instance_password'] %>
+DB2_INST.SVCENAME              = db2c_DB2_INST
+DB2_INST.PORT_NUMBER           = <%= @params['port'] %>
+DB2_INST.FCM_PORT_NUMBER       = <%= @params['fcm_port'] %>
+DB2_INST.MAX_LOGICAL_NODES     = <%= @params['max_logical_nodes'] %>
+DB2_INST.CONFIGURE_TEXT_SEARCH = NO
+*  Fenced user
+DB2_INST.FENCED_USERNAME       = <%= @params['fenced_username'] %>
+DB2_INST.FENCED_GROUP_NAME     = <%= @params['fenced_username'] %>
+DB2_INST.FENCED_HOME_DIRECTORY = /home/<%= @params['fenced_username'] %>
+DB2_INST.FENCED_PASSWORD       = <%= @params['fenced_password'] %>
+
+*-----------------------------------------------
+*  Installed Languages
+*-----------------------------------------------
+LANG       = EN

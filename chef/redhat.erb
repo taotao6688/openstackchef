@@ -1,0 +1,73 @@
+bash -c '
+
+## chef client rpm package location
+chef_client_pkg='https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chef-11.10.4-1.el6.x86_64.rpm'
+
+<%= "export http_proxy=\"#{knife_config[:bootstrap_proxy]}\"" if knife_config[:bootstrap_proxy] -%>
+
+exists() {
+  if command -v $1 &>/dev/null
+  then
+    return 0
+  else
+    return 1
+  fi
+}
+
+add_editor_environment() {
+  if [ "x$EDITOR" = "x" ]; then
+    if ! grep -q "EDITOR=" /root/.bashrc; then
+      echo "export EDITOR=vim" >> /root/.bashrc
+    fi
+  fi
+}
+
+version_string="-v <%= chef_version %>"
+
+if ! exists /usr/bin/chef-client; then
+  echo "#########################################################"
+  echo "#	Install Chef Client				"
+  echo "#########################################################"
+  if exists rpm; then
+    rpm -i $chef_client_pkg
+  else
+    echo "No rpm command found. Please install one and try again." >&2
+    exit 1
+  fi
+fi
+
+add_editor_environment
+mkdir -p /etc/chef
+
+cat > /etc/chef/validation.pem <<'EOP'
+<%= validation_key %>
+EOP
+chmod 0600 /etc/chef/validation.pem
+
+<% if encrypted_data_bag_secret -%>
+cat > /etc/chef/encrypted_data_bag_secret <<'EOP'
+<%= encrypted_data_bag_secret %>
+EOP
+chmod 0600 /etc/chef/encrypted_data_bag_secret
+<% end -%>
+
+<%# Generate Ohai Hints -%>
+<% unless @chef_config[:knife][:hints].nil? || @chef_config[:knife][:hints].empty? -%>
+mkdir -p /etc/chef/ohai/hints
+
+<% @chef_config[:knife][:hints].each do |name, hash| -%>
+cat > /etc/chef/ohai/hints/<%= name %>.json <<'EOP'
+<%= hash.to_json %>
+EOP
+<% end -%>
+<% end -%>
+
+cat > /etc/chef/client.rb <<'EOP'
+<%= config_content %>
+EOP
+
+cat > /etc/chef/first-boot.json <<'EOP'
+<%= first_boot.to_json %>
+EOP
+
+<%= start_chef %>'
